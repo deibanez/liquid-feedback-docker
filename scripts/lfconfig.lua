@@ -9,7 +9,7 @@ config.instance_name = "Liquid Feedback Docker Instance"
 
 -- Information about service provider (HTML)
 -- ------------------------------------------------------------------------
-config.app_service_provider = "Docker"
+config.app_service_provider = "https://github.com/DarkGigaByte/liquid-feedback-docker"
 
 
 -- A HTML formatted text the user has to accept while registering
@@ -43,7 +43,7 @@ config.localhost = false
 -- Connection information for the LiquidFeedback database
 -- https://www.postgresql.org/docs/8.4/static/libpq-connect.html
 -- ------------------------------------------------------------------------
-config.database = { host='127.0.0.1', engine='postgresql', dbname='liquid_feedback', user='liquid_feedback', password='liquid' }
+config.database = { host='db', engine='postgresql', dbname='liquid_feedback', user='liquid_feedback', password='liquid' }
 
 
 -- Location of the rocketwiki binaries

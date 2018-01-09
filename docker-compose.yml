@@ -1,0 +1,25 @@
+version: '3'
+services:
+  liquid-feedback-docker:
+    restart: always
+    ports:
+      - '8080:8080'
+    volumes:
+      - '/data/lftest/config:/opt/lf/frontend/config'
+    image: 'darkgigabyte/liquid-feedback-docker:latest'
+    depends_on:
+      - db
+    environment:
+      SMARTHOST_ADDRESS: YOUR_SMARTHOST_SMTP_SERVER:25
+      POSTGRES_USER: liquid_feedback
+      POSTGRES_PASSWORD: liquid
+      POSTGRES_DB: liquid_feedback
+  db:
+    image: 'postgres:9.4-alpine'
+    restart: always
+    volumes:
+      - '/data/postgres/pgdata:/var/lib/postgresql/data'
+    environment:
+      POSTGRES_USER: liquid_feedback
+      POSTGRES_PASSWORD: liquid
+      POSTGRES_DB: liquid_feedback

@@ -4,25 +4,27 @@
 
 FROM debian:jessie
 
-MAINTAINER Pedro Ângelo <pangelo@void.io>
+MAINTAINER Pascal Schneider <https://github.com/DarkGigaByte>
 
-ENV LF_CORE_VERSION 3.2.1
+ENV LF_CORE_VERSION 3.2.2
 ENV LF_FEND_VERSION 3.2.1
 ENV LF_WMCP_VERSION 2.1.0
 ENV LF_MOONBRIDGE_VERSION 1.0.1
+ENV LF_LATLON_VERSION 0.12
 
 #
 # install dependencies
 #
 
-RUN apt-get update && apt-get -y install \
+RUN apt-get update && apt-get -y remove exim && apt-get -y install \
         build-essential \
-        exim4 \
+        ssmtp \
         imagemagick \
-        liblua5.2-dev \
         libpq-dev \
         lua5.2 \
         liblua5.2-0 \
+        liblua5.2-0-dbg \
+        liblua5.2-dev \
         mercurial \
         postgresql \
         postgresql-server-dev-9.4 \
@@ -30,23 +32,23 @@ RUN apt-get update && apt-get -y install \
         pmake \
         libbsd-dev \
         curl \
-    && pip install markdown2
+    && pip install markdown2 \
+    && ln -s `which ssmtp` /usr/bin/sendmail
+
 
 #
 # prepare file tree
 #
-
-
 RUN mkdir -p /opt/lf/sources/patches \
              /opt/lf/sources/scripts \
              /opt/lf/bin
 
 WORKDIR /opt/lf/sources
 
+
 #
 # Download sources
 #
-
 RUN hg clone -r v${LF_CORE_VERSION} http://www.public-software-group.org/mercurial/liquid_feedback_core/ ./core \
     && hg clone -r v${LF_FEND_VERSION} http://www.public-software-group.org/mercurial/liquid_feedback_frontend/ ./frontend \
     && hg clone -r v${LF_WMCP_VERSION} http://www.public-software-group.org/mercurial/webmcp ./webmcp
@@ -66,7 +68,6 @@ RUN cd /opt/lf/sources/moonbridge-v${LF_MOONBRIDGE_VERSION} \
 #
 # build core
 #
-
 WORKDIR /opt/lf/sources/core
 
 RUN make \
@@ -75,15 +76,7 @@ RUN make \
 #
 # build WebMCP
 #
-
-# COPY ./patches/webmcp_build.patch /opt/lf/sources/patches/
-
 WORKDIR /opt/lf/sources/webmcp
-
-# RUN patch -p1 -i /opt/lf/sources/patches/webmcp_build.patch \
-#     && make \
-#     && mkdir /opt/lf/webmcp \
-#     && cp -RL framework/* /opt/lf/webmcp
 
 RUN make \
     && mkdir /opt/lf/webmcp \
@@ -100,22 +93,16 @@ RUN cd /opt/lf/sources/frontend \
 #
 # setup db
 #
-
-COPY ./scripts/setup_db.sql /opt/lf/sources/scripts/
-COPY ./scripts/config_db.sql /opt/lf/sources/scripts/
+RUN cp /opt/lf/sources/core/core.sql /opt/lf/
+COPY ./scripts/config_db.sql /opt/lf/
 
 RUN addgroup --system lf \
-    && adduser --system --ingroup lf --no-create-home --disabled-password lf \
-    && service postgresql start \
-    && (su -l postgres -c "psql -f /opt/lf/sources/scripts/setup_db.sql") \
-    && (su -l postgres -c "PGPASSWORD=liquid psql -U liquid_feedback -h 127.0.0.1 -f /opt/lf/sources/core/core.sql liquid_feedback") \
-    && (su -l postgres -c "PGPASSWORD=liquid psql -U liquid_feedback -h 127.0.0.1 -f /opt/lf/sources/scripts/config_db.sql liquid_feedback") \
-    && service postgresql stop
+    && adduser --system --ingroup lf --no-create-home --disabled-password lf
+
 
 #
 # cleanup
 #
-
 RUN rm -rf /opt/lf/sources \
     && apt-get -y purge \
         build-essential \
@@ -131,15 +118,10 @@ RUN rm -rf /opt/lf/sources \
 # configure everything
 #
 
-# TODO: configure mail system
-
-# # webserver config
-# COPY ./scripts/60-liquidfeedback.conf /etc/lighttpd/conf-available/
-
-# RUN ln -s /etc/lighttpd/conf-available/60-liquidfeedback.conf /etc/lighttpd/conf-enabled/60-lighttpd.conf
-
-# app config
+# app config (for running container without -v)
 COPY ./scripts/lfconfig.lua /opt/lf/frontend/config/
+# app config (for copy-if-not-exists when running container with -v)
+COPY ./scripts/lfconfig.lua /tmp/
 
 # update script
 COPY ./scripts/lf_updated /opt/lf/bin/
@@ -152,6 +134,8 @@ COPY ./scripts/start.sh /opt/lf/bin/
 #
 
 EXPOSE 8080
+
+VOLUME /opt/lf/frontend/config/
 
 WORKDIR /opt/lf/frontend
 

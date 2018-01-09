@@ -4,10 +4,10 @@ PIDFILE="/var/run/lf_updated.pid"
 PID=$$
 
 LFUSER="lf"
-DBHOST="localhost"
-DBNAME="liquid_feedback"
-DBUSER="liquid_feedback"
-DBPASS="liquid"
+DBHOST="db"
+DBNAME="${POSTGRES_DB}"
+DBUSER="${POSTGRES_USER}"
+DBPASS="${POSTGRES_PASSWORD}"
 
 if [ -f "${PIDFILE}" ] && kill -CONT $( cat "${PIDFILE}" ); then
   echo "lf_updated is already running."
