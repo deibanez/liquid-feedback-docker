@@ -5,8 +5,9 @@ services:
     ports:
       - '8080:8080'
     volumes:
-      - '/data/lftest/config:/opt/lf/frontend/config'
-    image: 'darkgigabyte/liquid-feedback-docker:latest'
+      - lf:/opt/lf/frontend/config
+    #image: 'darkgigabyte/liquid-feedback-docker:latest'
+    build: .
     depends_on:
       - db
     environment:
@@ -18,8 +19,12 @@ services:
     image: 'postgres:9.4-alpine'
     restart: always
     volumes:
-      - '/data/postgres/pgdata:/var/lib/postgresql/data'
+      - pg:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: liquid_feedback
       POSTGRES_PASSWORD: liquid
       POSTGRES_DB: liquid_feedback
+
+volumes:
+  lf:
+  pg:
