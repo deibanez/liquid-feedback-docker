@@ -1,6 +1,6 @@
 version: '3'
 services:
-  liquid-feedback-docker:
+  lf-web:
     restart: always
     ports:
       - '8080:8080'
@@ -10,20 +10,25 @@ services:
     build: .
     depends_on:
       - db
-    environment:
-      SMARTHOST_ADDRESS: YOUR_SMARTHOST_SMTP_SERVER:25
-      POSTGRES_USER: liquid_feedback
-      POSTGRES_PASSWORD: liquid
-      POSTGRES_DB: liquid_feedback
+    env_file:
+      - lf.env
+
+  lf-cron:
+    restart: always
+    build: .
+    depends_on:
+      - db
+    env_file:
+      - lf.env
+    entrypoint: ["/opt/lf/bin/lf_updated"]
+    
   db:
     image: 'postgres:9.4-alpine'
     restart: always
     volumes:
       - pg:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: liquid_feedback
-      POSTGRES_PASSWORD: liquid
-      POSTGRES_DB: liquid_feedback
+    env_file:
+      - lf.env
 
 volumes:
   lf:

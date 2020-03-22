@@ -1,20 +1,12 @@
 #!/bin/sh
 
-PIDFILE="/var/run/lf_updated.pid"
-PID=$$
+logger(){>&2 echo $@;}
 
 LFUSER="lf"
-DBHOST="db"
+DBHOST="${POSTGRES_HOST}"
 DBNAME="${POSTGRES_DB}"
 DBUSER="${POSTGRES_USER}"
 DBPASS="${POSTGRES_PASSWORD}"
-
-if [ -f "${PIDFILE}" ] && kill -CONT $( cat "${PIDFILE}" ); then
-  echo "lf_updated is already running."
-  exit 1
-fi
-
-echo "${PID}" > "${PIDFILE}"
 
 while true; do
   nice /opt/lf/bin/lf_update host=${DBHOST} dbname=${DBNAME} user=${DBUSER} password=${DBPASS} 2>&1 | logger -t "lf_updated"
