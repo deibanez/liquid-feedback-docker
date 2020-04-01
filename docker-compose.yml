@@ -1,7 +1,7 @@
 version: '3'
 services:
   lf-web:
-    restart: always
+    restart: unless-stopped
     ports:
       - '8080:8080'
     volumes:
@@ -14,7 +14,7 @@ services:
       - lf.env
 
   lf-cron:
-    restart: always
+    restart: unless-stopped
     build: .
     depends_on:
       - db
@@ -24,7 +24,7 @@ services:
     
   db:
     image: 'postgres:9.4-alpine'
-    restart: always
+    restart: unless-stopped
     volumes:
       - pg:/var/lib/postgresql/data
     env_file:
