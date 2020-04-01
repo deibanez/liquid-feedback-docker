@@ -14,7 +14,7 @@ if [ $? -eq 1 ] ; then
     # table does not exists and we need to bootstrap the DB
     # $? is 1
     PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "${POSTGRES_HOST}" -q -d ${POSTGRES_DB} -f /opt/lf/core.sql
-    PGPASSWORD"${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "${POSTGRES_HOST}" -q -d ${POSTGRES_DB} -f /opt/lf/config_db.sql
+    PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "${POSTGRES_HOST}" -q -d ${POSTGRES_DB} -f /opt/lf/config_db.sql
 fi
 
 set -e
