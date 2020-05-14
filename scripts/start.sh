@@ -25,7 +25,7 @@ if [ ! -f /opt/lf/frontend/config/lfconfig.lua ] ; then
 fi
 
 if [ -z $1 ] ; then
-
+        chown -R www-data:www-data "/opt/lf/frontend/tmp"
         su -s /bin/bash www-data -c "/opt/lf/moonbridge/moonbridge /opt/lf/webmcp/bin/mcp.lua /opt/lf/webmcp/ /opt/lf/frontend/ main lfconfig"
 
 else
